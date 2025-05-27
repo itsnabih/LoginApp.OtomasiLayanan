@@ -39,15 +39,15 @@ pipeline {
         }
     }
 
-    stage('Deploy to Kubernetes') {
+   stage('Deploy to Kubernetes') {
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
           script {
             // Update deployment image
             sh """
               docker run --rm \
-                -v \$KCFG:/kubeconfig \
-                -e KUBECONFIG=/kubeconfig \
+                -v \$KCFG:/tmp/kubeconfigfile \
+                -e KUBECONFIG=/tmp/kubeconfigfile \
                 --network host \
                 bitnami/kubectl:latest \
                 -n login-app set image deployment/login-app login-app=${REGISTRY}/${IMAGE}:${TAG}
@@ -56,8 +56,8 @@ pipeline {
             // Check rollout status
             sh """
               docker run --rm \
-                -v \$KCFG:/kubeconfig \
-                -e KUBECONFIG=/kubeconfig \
+                -v \$KCFG:/tmp/kubeconfigfile \
+                -e KUBECONFIG=/tmp/kubeconfigfile \
                 --network host \
                 bitnami/kubectl:latest \
                 -n login-app rollout status deployment/login-app --timeout=300s
