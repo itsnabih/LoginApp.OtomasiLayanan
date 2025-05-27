@@ -12,9 +12,13 @@ pipeline {
 
     stage('Unit Test') {
       steps {
-        docker.image('node:20').inside('-v $PWD/app:/app -w /app') {
-          sh 'npm ci'
-          sh 'npm test || echo "no tests"'
+        script {
+          docker.image('node:20').inside {
+            dir('app') {
+              sh 'npm ci'
+              sh 'npm test || echo "no tests"'
+            }
+          }
         }
       }
     }
@@ -23,13 +27,14 @@ pipeline {
       steps {
         script {
           docker.image('docker:24-dind').inside('--privileged -v /var/run/docker.sock:/var/run/docker.sock') {
-            sh '''
-              cd app
-              docker build -t ${REG}/${IMAGE}:${TAG} -t ${REG}/${IMAGE}:latest .
-              echo $DOCKER_PAT | docker login -u ${REG} --password-stdin
-              docker push ${REG}/${IMAGE}:${TAG}
-              docker push ${REG}/${IMAGE}:latest
-            '''
+            dir('app') {
+              sh """
+                docker build -t ${REG}/${IMAGE}:${TAG} -t ${REG}/${IMAGE}:latest .
+                echo ${DOCKER_PAT} | docker login -u ${REG} --password-stdin
+                docker push ${REG}/${IMAGE}:${TAG}
+                docker push ${REG}/${IMAGE}:latest
+              """
+            }
           }
         }
       }
@@ -38,12 +43,12 @@ pipeline {
     stage('Deploy to K8s') {
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-          sh '''
+          sh """
             export KUBECONFIG=$KCFG
             kubectl -n login-app set image deploy/login-app \
               login-app=${REG}/${IMAGE}:${TAG}
             kubectl -n login-app rollout status deploy/login-app
-          '''
+          """
         }
       }
     }
