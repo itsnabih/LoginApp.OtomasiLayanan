@@ -38,35 +38,22 @@ pipeline {
             }
         }
     }
-
-   stage('Deploy to Kubernetes') {
-      steps {
+stage('Deploy to Kubernetes') {
+    steps {
+        // ambil kubeconfig-nya sebagai FILE, bukan dir
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-          script {
-            // Update deployment image
-            sh """
-              docker run --rm \
-                -v \$KCFG:/tmp/kubeconfigfile \
-                -e KUBECONFIG=/tmp/kubeconfigfile \
-                --network host \
-                bitnami/kubectl:latest \
-                -n login-app set image deployment/login-app login-app=${REGISTRY}/${IMAGE}:${TAG}
-            """
-            
-            // Check rollout status
-            sh """
-              docker run --rm \
-                -v \$KCFG:/tmp/kubeconfigfile \
-                -e KUBECONFIG=/tmp/kubeconfigfile \
-                --network host \
-                bitnami/kubectl:latest \
-                -n login-app rollout status deployment/login-app --timeout=300s
-            """
-          }
+            // ❶ Versi tanpa docker-run (paling simpel)
+            sh '''
+                kubectl --kubeconfig="$KCFG" \
+                       -n login-app \
+                       set image deployment/login-app \
+                       login-app=wiyuwarwoyo/login-app2:${BUILD_NUMBER}
+            '''
+        
         }
-      }
     }
-  }
+}
+
 
   post {
     success {
