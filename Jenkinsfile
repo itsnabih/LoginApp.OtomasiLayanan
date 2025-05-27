@@ -38,6 +38,7 @@ pipeline {
             }
         }
     }
+
     stage('Deploy to Kubernetes') {
         steps {
             // ambil kubeconfig-nya sebagai FILE, bukan dir
@@ -49,12 +50,24 @@ pipeline {
                         set image deployment/login-app \
                         login-app=wiyuwarwoyo/login-app2:${BUILD_NUMBER}
                 '''
-            
+                
+                // ❷ Kalau tetap mau pakai bitnami/kubectl di dalam container:
+                /*
+                sh """
+                docker run --rm \
+                    -v "$KCFG":/kubeconfig:ro \        # <- mount file, bukan dir
+                    -e KUBECONFIG=/kubeconfig \
+                    --network host \
+                    bitnami/kubectl:latest \
+                    -n login-app set image deployment/login-app \
+                    login-app=wiyuwarwoyo/login-app2:${BUILD_NUMBER}
+                """
+                */
             }
         }
     }
-
   }
+
   post {
     success {
       echo '✅ Deploy sukses!'
