@@ -29,7 +29,6 @@ pipeline {
     stage('Build & Push Image') {
         steps {
             withCredentials([string(credentialsId: 'DOCKER_PAT', variable: 'DOCKER_PAT')]) {
-            dir('app') {
                 sh """
                 echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
                 docker build -t ${REGISTRY}/${IMAGE}:${TAG} -t ${REGISTRY}/${IMAGE}:latest .
@@ -37,11 +36,8 @@ pipeline {
                 docker push ${REGISTRY}/${IMAGE}:latest
                 """
             }
-            }
         }
     }
-
-
 
     stage('Deploy to Kubernetes') {
       steps {
