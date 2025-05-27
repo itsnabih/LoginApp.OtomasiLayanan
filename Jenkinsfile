@@ -24,18 +24,19 @@ pipeline {
     }
 
     stage('Build & Push Image') {
+      environment {
+        DOCKER_CONFIG = "${HOME}/.docker"      // supaya login di volume home
+      }
       steps {
         script {
-          docker.image('docker:24-dind').inside('--privileged -v /var/run/docker.sock:/var/run/docker.sock') {
-            dir('app') {
-              sh """
-                docker build -t ${REG}/${IMAGE}:${TAG} -t ${REG}/${IMAGE}:latest .
-                echo ${DOCKER_PAT} | docker login -u ${REG} --password-stdin
-                docker push ${REG}/${IMAGE}:${TAG}
-                docker push ${REG}/${IMAGE}:latest
-              """
-            }
-          }
+          // Gunakan host Docker langsung; workspace sudah di-mount
+          sh """
+            cd app
+            docker build -t ${REG}/${IMAGE}:${TAG} -t ${REG}/${IMAGE}:latest .
+            echo ${DOCKER_PAT} | docker login -u ${REG} --password-stdin
+            docker push ${REG}/${IMAGE}:${TAG}
+            docker push ${REG}/${IMAGE}:latest
+          """
         }
       }
     }
