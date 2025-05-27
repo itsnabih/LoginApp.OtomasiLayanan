@@ -33,9 +33,9 @@ pipeline {
           dir('app') {
             sh """
               echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
-              docker build -t ${REGISTRY}/${IMAGE}:${TAG} -t ${REGISTRY}/${IMAGE}:latest .
-              docker push ${REGISTRY}/${IMAGE}:${TAG}
-              docker push ${REGISTRY}/${IMAGE}:latest
+              docker build -t ${REGISTRY}/${IMAGE}:${TAG} \
+             -t ${REGISTRY}/${IMAGE}:latest \
+             -f app/Dockerfile app
             """
           }
         }
