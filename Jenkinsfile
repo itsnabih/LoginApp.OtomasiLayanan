@@ -38,23 +38,23 @@ pipeline {
             }
         }
     }
-stage('Deploy to Kubernetes') {
-    steps {
-        // ambil kubeconfig-nya sebagai FILE, bukan dir
-        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-            // ❶ Versi tanpa docker-run (paling simpel)
-            sh '''
-                kubectl --kubeconfig="$KCFG" \
-                       -n login-app \
-                       set image deployment/login-app \
-                       login-app=wiyuwarwoyo/login-app2:${BUILD_NUMBER}
-            '''
-        
+    stage('Deploy to Kubernetes') {
+        steps {
+            // ambil kubeconfig-nya sebagai FILE, bukan dir
+            withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
+                // ❶ Versi tanpa docker-run (paling simpel)
+                sh '''
+                    kubectl --kubeconfig="$KCFG" \
+                        -n login-app \
+                        set image deployment/login-app \
+                        login-app=wiyuwarwoyo/login-app2:${BUILD_NUMBER}
+                '''
+            
+            }
         }
     }
-}
 
-
+  }
   post {
     success {
       echo '✅ Deploy sukses!'
