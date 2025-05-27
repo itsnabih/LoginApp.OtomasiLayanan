@@ -50,7 +50,7 @@ pipeline {
                 -e KUBECONFIG=/kubeconfig \
                 --network host \
                 bitnami/kubectl:latest \
-                kubectl -n login-app set image deployment/login-app login-app=${REGISTRY}/${IMAGE}:${TAG}
+                -n login-app set image deployment/login-app login-app=${REGISTRY}/${IMAGE}:${TAG}
             """
             
             // Check rollout status
@@ -60,7 +60,7 @@ pipeline {
                 -e KUBECONFIG=/kubeconfig \
                 --network host \
                 bitnami/kubectl:latest \
-                kubectl -n login-app rollout status deployment/login-app --timeout=300s
+                -n login-app rollout status deployment/login-app --timeout=300s
             """
           }
         }
