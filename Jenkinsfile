@@ -27,18 +27,16 @@ pipeline {
       }
     }
     stage('Build & Push Image') {
-        steps {
-            withCredentials([string(credentialsId: 'DOCKER_PAT', variable: 'DOCKER_PAT')]) {
-            sh """
-                echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
-                docker build -t ${REGISTRY}/${IMAGE}:${TAG} \
-                            -t ${REGISTRY}/${IMAGE}:latest \
-                            -f app/Dockerfile app
-                docker push ${REGISTRY}/${IMAGE}:${TAG}
-                docker push ${REGISTRY}/${IMAGE}:latest
-            """
-            }
+    steps {
+        withCredentials([string(credentialsId: 'DOCKER_PAT', variable: 'DOCKER_PAT')]) {
+        sh """
+            echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
+            docker build -f app/Dockerfile -t ${REGISTRY}/${IMAGE}:${TAG} -t ${REGISTRY}/${IMAGE}:latest .
+            docker push ${REGISTRY}/${IMAGE}:${TAG}
+            docker push ${REGISTRY}/${IMAGE}:latest
+        """
         }
+    }
     }
 
 
