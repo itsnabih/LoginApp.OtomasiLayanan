@@ -26,21 +26,21 @@ pipeline {
         }
       }
     }
-
     stage('Build & Push Image') {
-      steps {
-        withCredentials([string(credentialsId: 'DOCKER_PAT', variable: 'DOCKER_PAT')]) {
-          dir('app') {
+        steps {
+            withCredentials([string(credentialsId: 'DOCKER_PAT', variable: 'DOCKER_PAT')]) {
             sh """
-              echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
-              docker build -t ${REGISTRY}/${IMAGE}:${TAG} \
-             -t ${REGISTRY}/${IMAGE}:latest \
-             -f app/Dockerfile app
+                echo "\$DOCKER_PAT" | docker login -u ${REGISTRY} --password-stdin
+                docker build -t ${REGISTRY}/${IMAGE}:${TAG} \
+                            -t ${REGISTRY}/${IMAGE}:latest \
+                            -f app/Dockerfile app
+                docker push ${REGISTRY}/${IMAGE}:${TAG}
+                docker push ${REGISTRY}/${IMAGE}:latest
             """
-          }
+            }
         }
-      }
     }
+
 
     stage('Deploy to Kubernetes') {
       steps {
