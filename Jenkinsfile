@@ -41,17 +41,21 @@ pipeline {
 
     stage('Deploy to Kubernetes') {
       steps {
-        script {
-          docker.image('bitnami/kubectl:latest').inside {
-            withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
-              sh """
-                export KUBECONFIG=\$KCFG
-                kubectl -n login-app set image deployment/login-app \
-                  login-app=${REGISTRY}/${IMAGE}:${TAG}
-                kubectl -n login-app rollout status deployment/login-app
-              """
-            }
-          }
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
+          sh """
+            docker run --rm \
+              -v \$KCFG:/kubeconfig \
+              -e KUBECONFIG=/kubeconfig \
+              bitnami/kubectl:latest \
+              kubectl -n login-app set image deployment/login-app \
+              login-app=${REGISTRY}/${IMAGE}:${TAG}
+            
+            docker run --rm \
+              -v \$KCFG:/kubeconfig \
+              -e KUBECONFIG=/kubeconfig \
+              bitnami/kubectl:latest \
+              kubectl -n login-app rollout status deployment/login-app
+          """
         }
       }
     }
