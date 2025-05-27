@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Login Page</title>
+            <title>Login Page New</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 50px; }
                 .login-form { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; }
