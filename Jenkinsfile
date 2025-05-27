@@ -47,14 +47,7 @@ pipeline {
               -v \$KCFG:/kubeconfig \
               -e KUBECONFIG=/kubeconfig \
               bitnami/kubectl:latest \
-              kubectl -n login-app set image deployment/login-app \
-              login-app=${REGISTRY}/${IMAGE}:${TAG}
-            
-            docker run --rm \
-              -v \$KCFG:/kubeconfig \
-              -e KUBECONFIG=/kubeconfig \
-              bitnami/kubectl:latest \
-              kubectl -n login-app rollout status deployment/login-app
+              sh -c "kubectl -n login-app set image deployment/login-app login-app=${REGISTRY}/${IMAGE}:${TAG} && kubectl -n login-app rollout status deployment/login-app"
           """
         }
       }
